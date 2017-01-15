@@ -17,12 +17,27 @@ import platform
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from aria.storage import model
+from sqlalchemy import Column, Text, Integer
+
+from aria.storage import (
+    model,
+    structure,
+    type as aria_type,
+)
 from sqlalchemy import (
     create_engine,
     orm)
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.pool import StaticPool
+
+
+class MockModel(model.DeclarativeBase, structure.ModelMixin): #pylint: disable=abstract-method
+    __tablename__ = 'mock_models'
+    model_dict = Column(aria_type.Dict)
+    model_list = Column(aria_type.List)
+    value = Column(Integer)
+    name = Column(Text)
+
 
 
 class TestFileSystem(object):
