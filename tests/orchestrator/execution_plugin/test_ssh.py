@@ -253,7 +253,7 @@ class TestWithActualSSHServer(object):
 
     def _upload(self, source, path):
         self._workflow_context.resource.deployment.upload(
-            entry_id=str(self._workflow_context.deployment.id),
+            entry_id=str(self._workflow_context.service_instance.id),
             source=source,
             path=path)
 

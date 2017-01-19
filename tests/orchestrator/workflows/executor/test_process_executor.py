@@ -22,7 +22,7 @@ from contextlib import contextmanager
 import pytest
 
 from aria import application_model_storage
-from aria.storage import model as aria_model
+from aria.storage.modeling import model as aria_model
 from aria.utils.plugin import create as create_plugin
 from aria.storage.sql_mapi import SQLAlchemyModelAPI
 from aria.orchestrator import events
@@ -38,7 +38,7 @@ class TestProcessExecutor(object):
 
     def test_plugin_execution(self, executor, mock_plugin):
         task = MockTask(plugin=mock_plugin,
-                        operation='mock_plugin1.operation')
+                        implementation='mock_plugin1.operation')
 
         queue = Queue.Queue()
 
@@ -119,11 +119,11 @@ class MockTask(object):
 
     INFINITE_RETRIES = aria_model.Task.INFINITE_RETRIES
 
-    def __init__(self, plugin, operation):
+    def __init__(self, plugin, implementation):
         self.id = str(uuid.uuid4())
-        self.operation_mapping = operation
+        self.implementation = implementation
         self.logger = logging.getLogger()
-        self.name = operation
+        self.name = implementation
         self.inputs = {}
         self.context = MockContext()
         self.retry_count = 0

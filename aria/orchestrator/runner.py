@@ -50,7 +50,7 @@ class Runner(object):
     """
 
     def __init__(self, workflow_name, workflow_fn, inputs, initialize_model_storage_fn,
-                 deployment_id, storage_path='', is_storage_temporary=True):
+                 service_instance_id, storage_path='', is_storage_temporary=True):
         if storage_path == '':
             # Temporary file storage
             the_file, storage_path = tempfile.mkstemp(suffix='.db', prefix='aria-')
@@ -59,7 +59,7 @@ class Runner(object):
         self._storage_path = storage_path
         self._is_storage_temporary = is_storage_temporary
 
-        workflow_context = self.create_workflow_context(workflow_name, deployment_id,
+        workflow_context = self.create_workflow_context(workflow_name, service_instance_id,
                                                         initialize_model_storage_fn)
 
         tasks_graph = workflow_fn(ctx=workflow_context, **inputs)
@@ -75,7 +75,7 @@ class Runner(object):
         finally:
             self.cleanup()
 
-    def create_workflow_context(self, workflow_name, deployment_id, initialize_model_storage_fn):
+    def create_workflow_context(self, workflow_name, service_instance_id, initialize_model_storage_fn):
         model_storage = self.create_sqlite_model_storage()
         initialize_model_storage_fn(model_storage)
         resource_storage = self.create_fs_resource_storage()
@@ -83,7 +83,7 @@ class Runner(object):
             name=workflow_name,
             model_storage=model_storage,
             resource_storage=resource_storage,
-            deployment_id=deployment_id,
+            service_instance_id=service_instance_id,
             workflow_name=self.__class__.__name__,
             task_max_attempts=1,
             task_retry_interval=1)
@@ -106,7 +106,7 @@ class Runner(object):
                 'sqlite:///%s%s' % (path_prefix, self._storage_path))
 
         # Models
-        model.DeclarativeBase.metadata.create_all(bind=sqlite_engine) # @UndefinedVariable
+        model.DB.metadata.create_all(bind=sqlite_engine) # @UndefinedVariable
 
         # Session
         sqlite_session_factory = orm.sessionmaker(bind=sqlite_engine)

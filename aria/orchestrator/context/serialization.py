@@ -23,7 +23,7 @@ def operation_context_to_dict(context):
     context_cls = context.__class__
     context_dict = {
         'name': context.name,
-        'deployment_id': context._deployment_id,
+        'service_instance_id': context._service_instance_id,
         'task_id': context._task_id,
         'actor_id': context._actor_id,
         'workdir': context._workdir

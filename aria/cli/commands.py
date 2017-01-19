@@ -366,7 +366,7 @@ class ExecuteCommand(BaseCommand):
             FileSystemResourceDriver(local_resource_storage()))
         model_storage = application_model_storage(
             FileSystemModelDriver(local_model_storage()))
-        deployment = model_storage.deployment.get(args_namespace.deployment_id)
+        deployment = model_storage.service_instance.get(args_namespace.deployment_id)
 
         try:
             workflow = deployment.workflows[args_namespace.workflow_id]

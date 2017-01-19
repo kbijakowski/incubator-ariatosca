@@ -25,20 +25,22 @@ from tests import storage
 def test_task_graph_into_execution_graph():
     operation_name = 'tosca.interfaces.node.lifecycle.Standard.create'
     task_context = mock.context.simple(storage.get_sqlite_api_kwargs())
-    node_instance = \
-        task_context.model.node_instance.get_by_name(mock.models.DEPENDENCY_NODE_INSTANCE_NAME)
+    node = task_context.model.node.get_by_name(mock.models.DEPENDENCY_NODE_INSTANCE_NAME)
+    node.interfaces = [mock.models.get_interface(operation_name)]
+    task_context.model.node.update(node)
+
     def sub_workflow(name, **_):
         return api.task_graph.TaskGraph(name)
 
     with context.workflow.current.push(task_context):
         test_task_graph = api.task.WorkflowTask(sub_workflow, name='test_task_graph')
-        simple_before_task = api.task.OperationTask.node_instance(instance=node_instance,
+        simple_before_task = api.task.OperationTask.node_instance(instance=node,
                                                                   name=operation_name)
-        simple_after_task = api.task.OperationTask.node_instance(instance=node_instance,
+        simple_after_task = api.task.OperationTask.node_instance(instance=node,
                                                                  name=operation_name)
 
         inner_task_graph = api.task.WorkflowTask(sub_workflow, name='test_inner_task_graph')
-        inner_task = api.task.OperationTask.node_instance(instance=node_instance,
+        inner_task = api.task.OperationTask.node_instance(instance=node,
                                                           name=operation_name)
         inner_task_graph.add_tasks(inner_task)
 
@@ -91,7 +93,7 @@ def test_task_graph_into_execution_graph():
 def _assert_execution_is_api_task(execution_task, api_task):
     assert execution_task.id == api_task.id
     assert execution_task.name == api_task.name
-    assert execution_task.operation_mapping == api_task.operation_mapping
+    assert execution_task.implementation == api_task.implementation
     assert execution_task.actor == api_task.actor
     assert execution_task.inputs == api_task.inputs
 

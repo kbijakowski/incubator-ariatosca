@@ -17,15 +17,14 @@ import pytest
 from sqlalchemy import Column, Text, Integer, event
 
 from aria.storage import (
-    model,
+    modeling,
     structure,
-    type as aria_type,
     ModelStorage,
     sql_mapi,
     instrumentation
 )
+from aria.storage.modeling import type as aria_type
 from ..storage import get_sqlite_api_kwargs, release_sqlite_storage
-
 
 STUB = instrumentation._STUB
 Value = instrumentation._Value
@@ -305,9 +304,9 @@ class _MockModel(structure.ModelMixin):
     string2 = Column(Text)
 
 
-class MockModel1(model.DeclarativeBase, _MockModel):
+class MockModel1(modeling.declarative_base, _MockModel):
     __tablename__ = 'mock_model1'
 
 
-class MockModel2(model.DeclarativeBase, _MockModel):
+class MockModel2(modeling.declarative_base, _MockModel):
     __tablename__ = 'mock_model2'

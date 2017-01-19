@@ -14,27 +14,25 @@
 # limitations under the License.
 
 import pytest
-
 from sqlalchemy import Column, Text, Integer
 
+from aria import application_model_storage
 from aria.storage import (
     ModelStorage,
-    model,
     exceptions,
     sql_mapi,
     structure,
-    type as aria_type,
+    modeling,
 )
-from aria import application_model_storage
-from ..storage import get_sqlite_api_kwargs, release_sqlite_storage
+from aria.storage.modeling import type as aria_type
 from ..mock import (
     context as mock_context,
-    models,
-    operations
+    models
 )
+from ..storage import get_sqlite_api_kwargs, release_sqlite_storage
 
 
-class MockModel(model.DeclarativeBase, structure.ModelMixin): #pylint: disable=abstract-method
+class MockModel(modeling.model.DB, structure.ModelMixin): #pylint: disable=abstract-method
     __tablename__ = 'mock_models'
     model_dict = Column(aria_type.Dict)
     model_list = Column(aria_type.List)
@@ -57,7 +55,7 @@ def context():
 
 @pytest.fixture(scope='module', autouse=True)
 def module_cleanup():
-    model.DeclarativeBase.metadata.remove(MockModel.__table__)  #pylint: disable=no-member
+    modeling.model.DB.metadata.remove(MockModel.__table__)  #pylint: disable=no-member
 
 
 def test_storage_base(storage):
@@ -112,24 +110,21 @@ def test_inner_list_update(storage):
     assert storage_mm.model_list[1][0] == 'new_inner_value'
     assert storage_mm.model_list[0] == 'new_value'
 
-
+# TODO: choose a new model to deployment
 def test_model_to_dict(context):
-    deployment = context.deployment
+    deployment = context.service_instance
     deployment_dict = deployment.to_dict()
 
     expected_keys = [
         'created_at',
         'description',
-        'inputs',
-        'groups',
-        'permalink',
         'policy_triggers',
         'policy_types',
-        'outputs',
         'scaling_groups',
         'updated_at',
         'workflows',
-        'blueprint_name',
+        'service_template_name',
+        'description'
     ]
 
     for expected_key in expected_keys:
@@ -137,93 +132,103 @@ def test_model_to_dict(context):
 
     assert 'blueprint_fk' not in deployment_dict
 
-
+# TODO: change factory to create different models
 def test_application_storage_factory():
     storage = application_model_storage(sql_mapi.SQLAlchemyModelAPI,
                                         api_kwargs=get_sqlite_api_kwargs())
+
+    assert storage.parameter
+    assert storage.mapping_template
+    assert storage.substitution_template
+    assert storage.service_template
+    assert storage.node_template
+    assert storage.group_template
+    assert storage.interface_template
+    assert storage.operation_template
+    assert storage.artifact_template
+    assert storage.policy_template
+    assert storage.group_policy_template
+    assert storage.group_policy_trigger_template
+    assert storage.requirement_template
+    assert storage.capability_template
+
+    assert storage.mapping
+    assert storage.substitution
+    assert storage.service_instance
     assert storage.node
-    assert storage.node_instance
-    assert storage.plugin
-    assert storage.blueprint
-    assert storage.deployment
-    assert storage.deployment_update
-    assert storage.deployment_update_step
-    assert storage.deployment_modification
+    assert storage.group
+    assert storage.interface
+    assert storage.operation
+    assert storage.capability
+    assert storage.artifact
+    assert storage.policy
+    assert storage.group_policy
+    assert storage.group_policy_trigger
+    assert storage.relationship
+
     assert storage.execution
+    assert storage.service_instance_update
+    assert storage.service_instance_update_step
+    assert storage.service_instance_modification
+    assert storage.plugin
+    assert storage.task
 
     release_sqlite_storage(storage)
 
 
 def test_relationship_model_ordering(context):
-    deployment = context.model.deployment.get_by_name(models.DEPLOYMENT_NAME)
-    source_node = context.model.node.get_by_name(models.DEPENDENT_NODE_NAME)
-    source_node_instance = context.model.node_instance.get_by_name(
+    deployment = context.model.service_instance.get_by_name(models.DEPLOYMENT_NAME)
+    source_node = context.model.node_template.get_by_name(models.DEPENDENT_NODE_NAME)
+    source_node_instance = context.model.node.get_by_name(
         models.DEPENDENT_NODE_INSTANCE_NAME)
-    target_node = context.model.node.get_by_name(models.DEPENDENCY_NODE_NAME)
-    target_node_instance = context.model.node_instance.get_by_name(
+    target_node = context.model.node_template.get_by_name(models.DEPENDENCY_NODE_NAME)
+    target_node_instance = context.model.node.get_by_name(
         models.DEPENDENCY_NODE_INSTANCE_NAME)
-    new_node = model.Node(
+    new_node = modeling.model.NodeTemplate(
         name='new_node',
-        type='test_node_type',
+        type_name='test_node_type',
         type_hierarchy=[],
-        number_of_instances=1,
-        planned_number_of_instances=1,
-        deploy_number_of_instances=1,
-        properties={},
-        operations=dict((key, {}) for key in operations.NODE_OPERATIONS),
-        min_number_of_instances=1,
-        max_number_of_instances=1,
-        deployment=deployment
+        default_instances=1,
+        min_instances=1,
+        max_instances=1,
+        service_template=deployment.service_template
     )
-    source_to_new_relationship = model.Relationship(
-        source_node=source_node,
-        target_node=new_node,
-        source_interfaces={},
-        source_operations=dict((key, {}) for key in operations.RELATIONSHIP_OPERATIONS),
-        target_interfaces={},
-        target_operations=dict((key, {}) for key in operations.RELATIONSHIP_OPERATIONS),
-        type='rel_type',
-        type_hierarchy=[],
-        properties={},
-    )
-    new_node_instance = model.NodeInstance(
+    req, cap = mock_context.models.get_relationship(new_node)
+    context.model.requirement_template.put(req)
+    context.model.capability_template.put(cap)
+
+    source_node.requirement_templates = [req]
+    source_node.capability_templates = [cap]
+    context.model.node_template.update(source_node)
+
+    new_node_instance = modeling.model.Node(
         name='new_node_instance',
+        service_instance=deployment,
         runtime_properties={},
         version=None,
-        node=new_node,
+        node_template=new_node,
         state='',
         scaling_groups=[]
     )
-    source_to_new_relationship_instance = model.RelationshipInstance(
-        relationship=source_to_new_relationship,
-        source_node_instance=source_node_instance,
-        target_node_instance=new_node_instance,
+    source_to_new_relationship_instance = mock_context.models.get_relationship_instance(
+        target_instance=new_node_instance,
+        source_instance=source_node_instance
     )
+    context.model.relationship.put(source_to_new_relationship_instance)
 
-    new_to_target_relationship = model.Relationship(
-        source_node=new_node,
-        target_node=target_node,
-        source_interfaces={},
-        source_operations=dict((key, {}) for key in operations.RELATIONSHIP_OPERATIONS),
-        target_interfaces={},
-        target_operations=dict((key, {}) for key in operations.RELATIONSHIP_OPERATIONS),
-        type='rel_type',
-        type_hierarchy=[],
-        properties={},
+    req, cap = mock_context.models.get_relationship(target_node)
+    context.model.requirement_template.put(req)
+    context.model.capability_template.put(cap)
+
+    target_node.requirement_templates = [req]
+    target_node.capability_templates = [cap]
+    context.model.node_template.update(target_node)
+
+    new_to_target_relationship_instance = modeling.model.Relationship(
+        source_node=new_node_instance,
+        target_node=target_node_instance,
     )
-    new_to_target_relationship_instance = model.RelationshipInstance(
-        relationship=new_to_target_relationship,
-        source_node_instance=new_node_instance,
-        target_node_instance=target_node_instance,
-    )
-
-
-    context.model.node.put(new_node)
-    context.model.node_instance.put(new_node_instance)
-    context.model.relationship.put(source_to_new_relationship)
-    context.model.relationship.put(new_to_target_relationship)
-    context.model.relationship_instance.put(source_to_new_relationship_instance)
-    context.model.relationship_instance.put(new_to_target_relationship_instance)
+    context.model.relationship.put(new_to_target_relationship_instance)
 
     def flip_and_assert(node_instance, direction):
         """
@@ -234,33 +239,22 @@ def test_relationship_model_ordering(context):
         """
         assert direction in ('inbound', 'outbound')
 
-        relationships = getattr(node_instance.node, direction + '_relationships')
-        relationship_instances = getattr(node_instance, direction + '_relationship_instances')
-        assert len(relationships) == 2
+        relationship_instances = getattr(node_instance, direction + '_relationships')
         assert len(relationship_instances) == 2
 
-        first_rel, second_rel = relationships
         first_rel_instance, second_rel_instance = relationship_instances
-        assert getattr(first_rel, relationships.ordering_attr) == 0
-        assert getattr(second_rel, relationships.ordering_attr) == 1
         assert getattr(first_rel_instance, relationship_instances.ordering_attr) == 0
         assert getattr(second_rel_instance, relationship_instances.ordering_attr) == 1
 
-        reversed_relationships = list(reversed(relationships))
         reversed_relationship_instances = list(reversed(relationship_instances))
 
-        assert relationships != reversed_relationships
         assert relationship_instances != reversed_relationship_instances
 
-        relationships[:] = reversed_relationships
         relationship_instances[:] = reversed_relationship_instances
-        context.model.node_instance.update(node_instance)
+        context.model.node.update(node_instance)
 
-        assert relationships == reversed_relationships
         assert relationship_instances == reversed_relationship_instances
 
-        assert getattr(first_rel, relationships.ordering_attr) == 1
-        assert getattr(second_rel, relationships.ordering_attr) == 0
         assert getattr(first_rel_instance, relationship_instances.ordering_attr) == 1
         assert getattr(second_rel_instance, relationship_instances.ordering_attr) == 0
 

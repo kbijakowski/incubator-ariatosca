@@ -102,14 +102,14 @@ class StorageManager(LoggerMixin):
         assert hasattr(self.model_storage, 'blueprint')
 
         self.logger.debug('creating blueprint resource storage entry')
-        self.resource_storage.blueprint.upload(
+        self.resource_storage.service_template.upload(
             entry_id=self.blueprint_id,
             source=os.path.dirname(source))
         self.logger.debug('created blueprint resource storage entry')
 
         self.logger.debug('creating blueprint model storage entry')
         now = datetime.utcnow()
-        blueprint = self.model_storage.blueprint.model_cls(
+        blueprint = self.model_storage.service_template.model_cls(
             plan=self.blueprint_plan,
             id=self.blueprint_id,
             description=self.blueprint_plan.get('description'),
@@ -117,7 +117,7 @@ class StorageManager(LoggerMixin):
             updated_at=now,
             main_file_name=main_file_name,
         )
-        self.model_storage.blueprint.put(blueprint)
+        self.model_storage.service_template.put(blueprint)
         self.logger.debug('created blueprint model storage entry')
 
     def create_nodes_storage(self):
@@ -164,10 +164,10 @@ class StorageManager(LoggerMixin):
         self.logger.debug('creating deployment resource storage entry')
         temp_dir = tempfile.mkdtemp()
         try:
-            self.resource_storage.blueprint.download(
+            self.resource_storage.service_template.download(
                 entry_id=self.blueprint_id,
                 destination=temp_dir)
-            self.resource_storage.deployment.upload(
+            self.resource_storage.service_instance.upload(
                 entry_id=self.deployment_id,
                 source=temp_dir)
         finally:
@@ -176,7 +176,7 @@ class StorageManager(LoggerMixin):
 
         self.logger.debug('creating deployment model storage entry')
         now = datetime.utcnow()
-        deployment = self.model_storage.deployment.model_cls(
+        deployment = self.model_storage.service_instance.model_cls(
             id=self.deployment_id,
             blueprint_id=self.blueprint_id,
             description=self.deployment_plan['description'],
@@ -190,7 +190,7 @@ class StorageManager(LoggerMixin):
             created_at=now,
             updated_at=now
         )
-        self.model_storage.deployment.put(deployment)
+        self.model_storage.service_instance.put(deployment)
         self.logger.debug('created deployment model storage entry')
 
     def create_node_instances_storage(self):
