@@ -75,7 +75,10 @@ class Runner(object):
         finally:
             self.cleanup()
 
-    def create_workflow_context(self, workflow_name, service_instance_id, initialize_model_storage_fn):
+    def create_workflow_context(self,
+                                workflow_name,
+                                service_instance_id,
+                                initialize_model_storage_fn):
         model_storage = self.create_sqlite_model_storage()
         initialize_model_storage_fn(model_storage)
         resource_storage = self.create_fs_resource_storage()

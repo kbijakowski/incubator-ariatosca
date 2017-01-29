@@ -304,9 +304,6 @@ def _patch_session(ctx, messenger, instrument):
 
 
 def _main():
-    # import pydevd
-    # pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
-
     arguments_json_path = sys.argv[1]
     with open(arguments_json_path) as f:
         arguments = jsonpickle.loads(f.read())

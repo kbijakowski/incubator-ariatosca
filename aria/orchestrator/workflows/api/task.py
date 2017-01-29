@@ -188,7 +188,15 @@ class OperationTask(BaseTask):
                              **kwargs)
 
     @classmethod
-    def _instance(cls, instance, name, operation_template, inputs, plugins, runs_on, *args, **kwargs):
+    def _instance(cls,
+                  instance,
+                  name,
+                  operation_template,
+                  inputs,
+                  plugins,
+                  runs_on,
+                  *args,
+                  **kwargs):
         matching_plugins = [p for p in plugins if p['name'] == operation_template.plugin]
         # All matching plugins should have identical package_name/package_version, so it's safe to
         # take the first found.

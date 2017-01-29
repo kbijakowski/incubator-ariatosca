@@ -78,7 +78,7 @@ def create_blueprint(context):
 def create_deployment(context, service_template, service_instance_id):
     now = datetime.utcnow()
     return model.ServiceInstance(
-        name='{0}_{1}' % (service_template.name, service_instance_id),
+        name='{0}_{1}'.format(service_template.name, service_instance_id),
         service_template=service_template,
         description=context.modeling.instance.description or '',
         created_at=now,
