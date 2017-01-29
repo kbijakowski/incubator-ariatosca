@@ -19,6 +19,7 @@ from . import (
     template_elements,
     instance_elements,
     orchestrator_elements,
+    elements,
     structure,
 )
 
@@ -29,7 +30,7 @@ DB = declarative_base(cls=structure.ModelIDMixin)
 # region elements
 
 
-class Parameter(structure.ParameterBase, DB):
+class Parameter(elements.ParameterBase, DB):
     pass
 
 # endregion
