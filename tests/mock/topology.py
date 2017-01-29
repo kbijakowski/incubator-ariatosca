@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
-
 from aria.storage import model
 
 from . import models
@@ -29,12 +27,13 @@ def create_simple_topology_single_node(model_storage, create_operation):
 
     node_template = models.get_dependency_node(service_instance)
     node_template.interface_templates = [models.get_interface_template(
-            'tosca.interfaces.node.lifecycle.Standard.create',
-            operation_kwargs=dict(implementation=create_operation,
-                                  inputs=[model.Parameter(name='key', value='create', type='str'),
-                                          model.Parameter(name='value', value=True, type='bool')]
-                                  )
-        )]
+        'tosca.interfaces.node.lifecycle.Standard.create',
+        operation_kwargs=dict(
+            implementation=create_operation,
+            inputs=[model.Parameter(name='key', value='create', type='str'),
+                    model.Parameter(name='value', value=True, type='bool')]
+        )
+    )]
     model_storage.node_template.put(node_template)
 
     node = models.get_dependency_node_instance(node_template, service_instance)

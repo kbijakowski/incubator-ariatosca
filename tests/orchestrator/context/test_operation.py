@@ -83,7 +83,7 @@ def test_node_operation_task_execution(ctx, executor):
     # Task bases assertions
     assert operation_context.task.actor == node
     assert operation_context.task.name == op_name(node, operation_name)
-    operations = interface.operations.filter_by(name=operation_name)
+    operations = interface.operations.filter_by(name=operation_name)                                # pylint: disable=no-member
     assert operations.count() == 1
     assert operation_context.task.implementation == operations[0].implementation
     assert operation_context.task.inputs == inputs
@@ -126,7 +126,7 @@ def test_relationship_operation_task_execution(ctx, executor):
     # Task bases assertions
     assert operation_context.task.actor == relationship
     assert operation_context.task.name.startswith(operation_name)
-    operation = interface.operations.filter_by(name=operation_name)
+    operation = interface.operations.filter_by(name=operation_name)                                 # pylint: disable=no-member
     assert operation_context.task.implementation == operation.all()[0].implementation
     assert operation_context.task.inputs == inputs
 
