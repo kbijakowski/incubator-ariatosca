@@ -21,7 +21,8 @@ from aria.utils.collections import OrderedDict
 from aria.utils.console import puts
 from aria.parser.exceptions import InvalidValueError
 from aria.parser.presentation import Value
-from aria.parser.modeling.exceptions import CannotEvaluateFunctionException
+
+from ..exceptions import CannotEvaluateFunctionException
 
 # UUID = ShortUUID() # default alphabet is base57, which is alphanumeric without visually ambiguous
 # characters; ID length is 22

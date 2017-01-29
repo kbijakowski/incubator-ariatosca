@@ -21,7 +21,7 @@ from ...utils.collections import OrderedDict
 from ...utils.console import puts
 from ..exceptions import InvalidValueError
 from ..presentation import Value
-from .exceptions import CannotEvaluateFunctionException
+from ...storage.exceptions import CannotEvaluateFunctionException
 
 # UUID = ShortUUID() # default alphabet is base57, which is alphanumeric without visually ambiguous
 # characters; ID length is 22

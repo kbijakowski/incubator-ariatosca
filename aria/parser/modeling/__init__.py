@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .exceptions import CannotEvaluateFunctionException
 from .context import IdType, ModelingContext
 from .elements import Element, ModelElement, Function, Parameter, Metadata
 from .instance_elements import (ServiceInstance, Node, Capability, Relationship, Artifact, Group,
@@ -27,7 +26,6 @@ from .types import TypeHierarchy, Type, RelationshipType, PolicyType, PolicyTrig
 from .storage import initialize_storage
 
 __all__ = (
-    'CannotEvaluateFunctionException',
     'IdType',
     'ModelingContext',
     'Element',

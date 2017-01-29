@@ -16,7 +16,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 
 from . import (
-    elements,
     template_elements,
     instance_elements,
     orchestrator_elements,
@@ -30,7 +29,7 @@ DB = declarative_base(cls=structure.ModelIDMixin)
 # region elements
 
 
-class Parameter(elements.ParameterBase, DB):
+class Parameter(structure.ParameterBase, DB):
     pass
 
 # endregion
