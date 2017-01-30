@@ -37,6 +37,7 @@ from . import (
 
 # region Element instances
 
+
 class ServiceInstanceBase(structure.ModelMixin):
     __tablename__ = 'service_instance'
 
@@ -74,25 +75,6 @@ class ServiceInstanceBase(structure.ModelMixin):
     @declared_attr
     def substitution(cls):
         return cls.one_to_one_relationship('substitution')
-    # endregion
-
-    # region one-to-many relationships
-    @declared_attr
-    def nodes(cls):
-        return cls.one_to_many_relationship('node')
-
-    @declared_attr
-    def groups(cls):
-        return cls.one_to_many_relationship('group')
-
-    @declared_attr
-    def policies(cls):
-        return cls.one_to_many_relationship('policy')
-
-    @declared_attr
-    def operations(cls):
-        return cls.one_to_many_relationship('operation')
-
     # endregion
 
     # region many-to-one relationships
@@ -185,6 +167,7 @@ class OperationBase(structure.ModelMixin):
     """
     __tablename__ = 'operation'
     # region foreign_keys
+
     @declared_attr
     def service_instance_fk(cls):
         return cls.foreign_key('service_instance', nullable=True)
@@ -203,6 +186,15 @@ class OperationBase(structure.ModelMixin):
     retry_interval = Column(Integer, default=None)
     plugin = Column(Text)
     operation = Column(Boolean)
+
+    # region many-to-one relationships
+    @declared_attr
+    def service_instance(cls):
+        return cls.many_to_one_relationship('service_instance')
+
+    @declared_attr
+    def interfaces(cls):
+        return cls.many_to_one_relationship('interface')
     # region many-to-many relationships
 
     @declared_attr
@@ -280,12 +272,26 @@ class InterfaceBase(structure.ModelMixin):
     description = Column(Text)
     type_name = Column(Text)
 
-    # region one-to-many relationships
+    # region many-to-one relationships
+
     @declared_attr
-    def operations(cls):
-        return cls.one_to_many_relationship('operation')
+    def node(cls):
+        return cls.many_to_one_relationship('node')
+
+    @declared_attr
+    def relationship(cls):
+        return cls.many_to_one_relationship('relationship')
+
+    @declared_attr
+    def group(cls):
+        return cls.many_to_one_relationship('group')
 
     # endregion
+
+
+    # endregion
+
+
 
     # region many-to-many relationships
 
@@ -355,6 +361,15 @@ class CapabilityBase(structure.ModelMixin):
     min_occurrences = Column(Integer, default=None) # optional
     max_occurrences = Column(Integer, default=None) # optional
     occurrences = Column(Integer, default=0)
+
+
+    # region many-to-one relationships
+    @declared_attr
+    def node(cls):
+        return cls.many_to_one_relationship('node')
+
+    # endregion
+
 
     # region many-to-many relationships
     @declared_attr
@@ -439,6 +454,14 @@ class ArtifactBase(structure.ModelMixin):
     repository_url = Column(Text)
     repository_credential = Column(aria_types.StrictDict(basestring, basestring))
 
+    # region many-to-one relationships
+    @declared_attr
+    def node(cls):
+        return cls.many_to_one_relationship('node')
+
+    # endregion
+
+
     # region many-to-many relationships
 
     @declared_attr
@@ -510,6 +533,11 @@ class PolicyBase(structure.ModelMixin):
     target_node_ids = Column(aria_types.StrictList(basestring))
     target_group_ids = Column(aria_types.StrictList(basestring))
 
+    # region many-to-one relationships
+    @declared_attr
+    def service_instnce(cls):
+        return cls.many_to_one_relationship('service_instance')
+
     # region many-to-many relationships
 
     @declared_attr
@@ -578,20 +606,19 @@ class GroupPolicyBase(structure.ModelMixin):
     description = Column(Text)
     type_name = Column(Text)
 
-    # region one-to-many relationships
-
+    # region many-to-one relationships
     @declared_attr
-    def triggers(cls):
-        return cls.one_to_many_relationship('group_policy_trigger')
+    def group(cls):
+        return cls.many_to_one_relationship('group')
 
-    # endregion
+    # end region
 
     # region many-to-many relationships
     @declared_attr
     def properties(cls):
         return cls.many_to_many_relationship('parameter', table_prefix='properties')
 
-    # relationships
+    # endregion
 
     @property
     def as_raw(self):
@@ -649,6 +676,14 @@ class GroupPolicyTriggerBase(structure.ModelMixin):
 
     description = Column(Text)
     implementation = Column(Text)
+
+    # region many-to-one relationships
+
+    @declared_attr
+    def group_policy(cls):
+        return cls.many_to_one_relationship('group_policy')
+
+    # endregion
 
     # region many-to-many relationships
 
@@ -844,21 +879,6 @@ class NodeBase(structure.ModelMixin):
         return association_proxy('service_instance', 'service_template')
     # endregion
 
-    # region one-to-many relationships
-    @declared_attr
-    def interfaces(cls):
-        return cls.one_to_many_relationship('interface')
-
-    @declared_attr
-    def artifacts(cls):
-        return cls.one_to_many_relationship('artifact')
-
-    @declared_attr
-    def capabilities(cls):
-        return cls.one_to_many_relationship('capability')
-
-    # endregion
-
     # region many-to-one relationships
     @declared_attr
     def service_instance(cls):
@@ -1036,16 +1056,10 @@ class GroupBase(structure.ModelMixin):
     member_node_ids = Column(aria_types.StrictList(basestring))
     member_group_ids = Column(aria_types.StrictList(basestring))
 
-    # region one-to-many relationships
+    # region many-to-one relationships
     @declared_attr
-    def interfaces(cls):
-        return cls.one_to_many_relationship('interface')
-
-    @declared_attr
-    def policies(cls):
-        return cls.one_to_many_relationship('group_policy')
-
-    # endregion
+    def service_instance(cls):
+        return cls.many_to_one_relationship('service_instance')
 
     # region many-to-many relationships
     @declared_attr

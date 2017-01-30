@@ -37,6 +37,8 @@ from sqlalchemy import (
     Table
 )
 
+from . import utils
+
 
 class Function(object):
     """
@@ -158,15 +160,17 @@ class ModelMixin(ElementBase):
         backref_kwargs.setdefault('cascade', 'all')
 
         return relationship(lambda: cls._get_cls_by_tablename(parent_table_name),
-                            backref=backref(backreference or cls.__tablename__,
+                            backref=backref(backreference or utils.pluralize(cls.__tablename__),
                                             **backref_kwargs or {}),
                             **relationship_kwargs)
 
-    @classmethod
-    def one_to_many_relationship(cls, child_table_name, backrefernce=None):
-        return relationship(lambda: cls._get_cls_by_tablename(child_table_name),
-                            backref=backrefernce or '{0}s'.format(cls.__tablename__),
-                            lazy='dynamic')
+
+
+    # @classmethod
+    # def one_to_many_relationship(cls, child_table_name, backrefernce=None):
+    #     return relationship(lambda: cls._get_cls_by_tablename(child_table_name),
+    #                         backref=backrefernce or '{0}s'.format(cls.__tablename__),
+    #                         lazy='dynamic')
 
     @classmethod
     def relationship_to_self(cls, local_column):

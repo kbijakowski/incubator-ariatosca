@@ -70,29 +70,6 @@ class ServiceTemplateBase(structure.ModelMixin):
         return cls.one_to_one_relationship('substitution_template')
     # endregion
 
-    # # region one-to-many relationships
-    @declared_attr
-    def node_templates(cls):
-        return cls.one_to_many_relationship('node_template')
-
-    @declared_attr
-    def group_templates(cls):
-        return cls.one_to_many_relationship('group_template')
-
-    @declared_attr
-    def policy_templates(cls):
-        return cls.one_to_many_relationship('policy_template')
-
-    @declared_attr
-    def operation_templates(cls):
-        """
-        Custom workflows
-        :return:
-        """
-        return cls.one_to_many_relationship('operation_template')
-
-    # endregion
-
     # region many-to-many relationships
 
     @declared_attr
@@ -210,10 +187,16 @@ class InterfaceTemplateBase(structure.ModelMixin):
     description = Column(Text)
     type_name = Column(Text)
 
-    # region one-to-many relationships
+    # region many-to-one relationship
     @declared_attr
-    def operation_templates(cls):
-        return cls.one_to_many_relationship('operation_template')
+    def node_template(cls):
+        return cls.many_to_one_relationship('node_template')
+
+    @declared_attr
+    def group_template(cls):
+        return cls.many_to_one_relationship('group_template')
+
+    # endregion
 
     # region many-to-many relationships
 
@@ -293,9 +276,15 @@ class OperationTemplateBase(structure.ModelMixin):
     plugin = Column(Text)
     operation = Column(Boolean)
 
+    # region many-to-one relationships
     @declared_attr
     def service_template(cls):
         return cls.many_to_one_relationship('service_template')
+
+    @declared_attr
+    def interface_template(cls):
+        return cls.many_to_one_relationship('interface_template')
+    # endregion
 
     # region many-to-many relationships
 
@@ -383,6 +372,12 @@ class ArtifactTemplateBase(structure.ModelMixin):
     target_path = Column(Text)
     repository_url = Column(Text)
     repository_credential = Column(aria_type.StrictDict(basestring, basestring))
+
+    # region many-to-one relationship
+    @declared_attr
+    def node_template(cls):
+        return cls.many_to_one_relationship('node_template')
+    # endregion
 
     # region many-to-many relationships
 
@@ -472,6 +467,17 @@ class PolicyTemplateBase(structure.ModelMixin):
     target_node_template_names = Column(aria_type.StrictList(basestring))
     target_group_template_names = Column(aria_type.StrictList(basestring))
 
+    # region many-to-one relationship
+    @declared_attr
+    def service_template(cls):
+        return cls.many_to_one_relationship('service_template')
+
+    @declared_attr
+    def group_template(cls):
+        return cls.many_to_one_relationship('group_template')
+
+    # endregion
+
     # region many-to-many relationships
 
     @declared_attr
@@ -551,13 +557,6 @@ class GroupPolicyTemplateBase(structure.ModelMixin):
     description = Column(Text)
     type_name = Column(Text)
 
-    # region one-to-many relationships
-    @declared_attr
-    def triggers(cls):
-        return cls.one_to_many_relationship('group_policy_trigger_template')
-
-    # end region
-
     # region many-to-many relationships
 
     @declared_attr
@@ -626,6 +625,14 @@ class GroupPolicyTriggerTemplateBase(structure.ModelMixin):
 
     description = Column(Text)
     implementation = Column(Text)
+
+    # region many-to-one relationship
+    @declared_attr
+    def group_policy_template(cls):
+        return cls.many_to_one_relationship('group_policy_template')
+
+    # endregion
+
 
     # region many-to-many relationships
 
@@ -820,22 +827,10 @@ class NodeTemplateBase(structure.ModelMixin):
 
     # endregion
 
-    # region one-to-many relationships
+    # region many-to-one relationship
     @declared_attr
-    def interface_templates(cls):
-        return cls.one_to_many_relationship('interface_template')
-
-    @declared_attr
-    def artifact_templates(cls):
-        return cls.one_to_many_relationship('artifact_template')
-
-    @declared_attr
-    def capability_templates(cls):
-        return cls.one_to_many_relationship('capability_template')
-
-    @declared_attr
-    def requirement_templates(cls):
-        return cls.one_to_many_relationship('requirement_template')
+    def service_template(cls):
+        return cls.many_to_one_relationship('service_template')
 
     # endregion
 
@@ -956,14 +951,10 @@ class GroupTemplateBase(structure.ModelMixin):
     member_node_template_names = Column(aria_type.StrictList(basestring))
     member_group_template_names = Column(aria_type.StrictList(basestring))
 
-    # region one-to-many relationships
+    # region many-to-one relationship
     @declared_attr
-    def interface_templates(cls):
-        return cls.one_to_many_relationship('interface_template')
-
-    @declared_attr
-    def policy_templates(cls):
-        return cls.one_to_many_relationship('policy_template')
+    def service_template(cls):
+        return cls.many_to_one_relationship('service_template')
 
     # endregion
 
@@ -1061,6 +1052,7 @@ class RequirementTemplateBase(structure.ModelMixin):
 
     # endregion
 
+
     target_node_type_name = Column(Text)
     target_node_template_name = Column(Text)
     target_node_template_constraints = Column(aria_type.StrictList(FunctionType))
@@ -1068,6 +1060,12 @@ class RequirementTemplateBase(structure.ModelMixin):
     target_capability_name = Column(Text)
     # CHECK: ???
     relationship_template = Column(Text)  # optional
+
+    # region many-to-one relationship
+    @declared_attr
+    def node_template(cls):
+        return cls.many_to_one_relationship('node_template')
+    # endregion
 
     def instantiate(self, context, container):
         raise NotImplementedError
@@ -1218,6 +1216,12 @@ class CapabilityTemplateBase(structure.ModelMixin):
     max_occurrences = Column(Integer, default=None)  # optional
     # CHECK: type?
     valid_source_node_type_names = Column(Text)
+
+    # region many-to-one relationship
+    @declared_attr
+    def node_template(cls):
+        return cls.many_to_one_relationship('node_template')
+    # endregion
 
     # region many-to-many relationships
 

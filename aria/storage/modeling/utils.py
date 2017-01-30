@@ -120,3 +120,12 @@ def dump_interfaces(context, interfaces, name='Interfaces'):
     with context.style.indent:
         for interface in interfaces.itervalues():
             interface.dump(context)
+
+
+def pluralize(noun):
+    if noun.endswith('s'):
+        return '{0}es'.format(noun)
+    elif noun.endswith('y'):
+        return '{0}ies'.format(noun[:-1])
+    else:
+        return '{0}s'.format(noun)
