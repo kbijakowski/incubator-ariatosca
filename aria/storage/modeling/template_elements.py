@@ -837,14 +837,6 @@ class NodeTemplateBase(structure.ModelMixin):
     # region many-to-many relationships
 
     @declared_attr
-    def service_template(cls):
-        return cls.many_to_one_relationship('service_template')
-
-    # endregion
-
-    # region many-to-many relationships
-
-    @declared_attr
     def properties(cls):
         return cls.many_to_many_relationship('parameter', table_prefix='properties')
 

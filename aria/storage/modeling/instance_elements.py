@@ -937,16 +937,12 @@ class NodeBase(structure.ModelMixin):
                 target_node = target_nodes[0]
 
             if target_node is not None:
-                if requirement_template.relationship_template is not None:
-                    relationship = \
-                        requirement_template.relationship_template.instantiate(context, self)
-                else:
-                    relationship = RelationshipBase()
-                relationship.name = requirement_template.name
-                relationship.source_requirement_index = requirement_template_index
-                relationship.target_node_id = target_node.id
-                if target_capability is not None:
-                    relationship.target_capability_name = target_capability.name
+                relationship = RelationshipBase(
+                    name=requirement_template.name,
+                    source_requirement_index=requirement_template_index,
+                    target_node_id=target_node.id,
+                    target_capability_name=target_capability.name
+                )
                 self.relationships.append(relationship)
             else:
                 context.validation.report('requirement "%s" of node "%s" targets node '
