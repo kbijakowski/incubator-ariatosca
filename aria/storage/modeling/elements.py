@@ -18,9 +18,9 @@ from sqlalchemy import (
     Text
 )
 
+from ...parser.modeling import utils
 from ...utils.collections import OrderedDict
 from ...utils.console import puts
-from .utils import coerce_value
 
 from . import structure
 from . import type
@@ -47,11 +47,11 @@ class ParameterBase(structure.ModelElementBase, structure.ModelMixin):
         return OrderedDict((
             ('name', self.name),
             ('type_name', self.type),
-            ('value', self._coerce_value()),
+            ('value', self._cast_value()),
             ('description', self.description)))
 
     # TODO: change name
-    def _coerce_value(self):
+    def _cast_value(self):
         if self.type is None:
             return
 
@@ -71,7 +71,7 @@ class ParameterBase(structure.ModelElementBase, structure.ModelMixin):
 
     def coerce_values(self, context, container, report_issues):
         if self.value is not None:
-            self.value = coerce_value(context, container, self.value, report_issues)
+            self.value = utils.coerce_value(context, container, self.value, report_issues)
 
 
 class MetadataBase(structure.ModelElementBase, structure.ModelMixin):

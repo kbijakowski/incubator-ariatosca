@@ -397,8 +397,8 @@ def coerce_value(context, presentation, the_type, entry_schema, constraints, val
 
     if hasattr(the_type, '_coerce_value'):
         # Delegate to '_coerce_value' (likely a DataType instance)
-        return the_type._coerce_value(context, presentation, entry_schema, constraints, value,
-                                      aspect)
+        return the_type._cast_value(context, presentation, entry_schema, constraints, value,
+                                    aspect)
 
     # Coerce to primitive type
     return coerce_to_primitive(context, presentation, the_type, constraints, value, aspect)

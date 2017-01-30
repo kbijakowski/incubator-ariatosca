@@ -23,9 +23,3 @@ class StorageError(exceptions.AriaError):
     General storage exception
     """
     pass
-
-
-class CannotEvaluateFunctionException(exceptions.AriaException):
-    """
-    ARIA modeling exception: cannot evaluate the function at this time.
-    """

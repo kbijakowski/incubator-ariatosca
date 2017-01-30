@@ -21,7 +21,7 @@ from ...utils.collections import OrderedDict
 from ...utils.console import puts
 from ..exceptions import InvalidValueError
 from ..presentation import Value
-from ...storage.exceptions import CannotEvaluateFunctionException
+from .exceptions import CannotEvaluateFunctionException
 
 # UUID = ShortUUID() # default alphabet is base57, which is alphanumeric without visually ambiguous
 # characters; ID length is 22
@@ -57,7 +57,7 @@ def coerce_value(context, container, value, report_issues=False):
         return [coerce_value(context, container, v, report_issues) for v in value]
     elif isinstance(value, dict):
         return OrderedDict((k, coerce_value(context, container, v, report_issues))
-                           for k, v in value.iteritems())
+                           for k, v in value.items())
     elif hasattr(value, '_evaluate'):
         try:
             value = value._evaluate(context, container)
@@ -73,7 +73,7 @@ def coerce_value(context, container, value, report_issues=False):
 def validate_dict_values(context, the_dict):
     if not the_dict:
         return
-    validate_list_values(context, the_dict.itervalues())
+    validate_list_values(context, the_dict.values())
 
 
 def validate_list_values(context, the_list):

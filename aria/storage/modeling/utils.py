@@ -17,12 +17,8 @@ from random import randrange
 
 from shortuuid import ShortUUID
 
-from aria.utils.collections import OrderedDict
-from aria.utils.console import puts
-from aria.parser.exceptions import InvalidValueError
-from aria.parser.presentation import Value
+from ...utils.console import puts
 
-from ..exceptions import CannotEvaluateFunctionException
 
 # UUID = ShortUUID() # default alphabet is base57, which is alphanumeric without visually ambiguous
 # characters; ID length is 22
@@ -48,27 +44,6 @@ def generate_hex_string():
     """
 
     return '%05x' % randrange(16 ** 5)
-
-
-def coerce_value(context, container, value, report_issues=False):
-    if isinstance(value, Value):
-        value = value.value
-
-    if isinstance(value, list):
-        return [coerce_value(context, container, v, report_issues) for v in value]
-    elif isinstance(value, dict):
-        return OrderedDict((k, coerce_value(context, container, v, report_issues))
-                           for k, v in value.iteritems())
-    elif hasattr(value, '_evaluate'):
-        try:
-            value = value._evaluate(context, container)
-            value = coerce_value(context, container, value, report_issues)
-        except CannotEvaluateFunctionException:
-            pass
-        except InvalidValueError as e:
-            if report_issues:
-                context.validation.report(e.issue)
-    return value
 
 
 def validate_dict_values(context, the_dict):

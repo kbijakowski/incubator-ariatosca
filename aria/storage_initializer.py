@@ -16,17 +16,17 @@
 from datetime import datetime
 from threading import RLock
 
-from ...storage import model
-from ...orchestrator import operation
-from ...utils.console import puts, Colored
-from ...utils.formatting import safe_repr
+from .storage import model
+from .orchestrator import operation
+from .utils.formatting import safe_repr
+from .utils.console import puts, Colored
 
 
 def initialize_storage(context, model_storage, deployment_id):
-    blueprint = create_blueprint(context)
+    blueprint = _create_blueprint(context)
     model_storage.blueprint.put(blueprint)
 
-    deployment = create_deployment(context, blueprint, deployment_id)
+    deployment = _create_deployment(context, blueprint, deployment_id)
     model_storage.deployment.put(deployment)
 
     # Create nodes and node instances
@@ -34,7 +34,7 @@ def initialize_storage(context, model_storage, deployment_id):
         model_storage.node_template.put(node_template)
 
         for a_node in context.modeling.instance.find_nodes(node_template.name):
-            node = create_node_instance(deployment, node_template, a_node)
+            node = _create_node_instance(deployment, node_template, a_node)
             model_storage.node.put(node)
 
     # Create relationships
@@ -53,11 +53,11 @@ def initialize_storage(context, model_storage, deployment_id):
                                 model_storage.node_instance.get_by_name(
                                     relationship_model.target_node_id)
                             relationship = \
-                                create_relationship_instance(source_instance, target_instance)
+                                _create_relationship_instance(source_instance, target_instance)
                             model_storage.relationship.put(relationship)
 
 
-def create_blueprint(context):
+def _create_blueprint(context):
     now = datetime.utcnow()
     main_file_name = unicode(context.presentation.location)
     try:
@@ -75,7 +75,7 @@ def create_blueprint(context):
     )
 
 
-def create_deployment(context, service_template, service_instance_id):
+def _create_deployment(context, service_template, service_instance_id):
     now = datetime.utcnow()
     return model.ServiceInstance(
         name='{0}_{1}'.format(service_template.name, service_instance_id),
@@ -90,7 +90,7 @@ def create_deployment(context, service_template, service_instance_id):
     )
 
 
-def create_node_instance(service_instance, node, node_model):
+def _create_node_instance(service_instance, node, node_model):
     return model.Node(
         service_instance=service_instance,
         name=node_model.id,
@@ -102,7 +102,7 @@ def create_node_instance(service_instance, node, node_model):
     )
 
 
-def create_relationship_instance(source_instance, target_instance):
+def _create_relationship_instance(source_instance, target_instance):
     return model.Relationship(
         source_node=source_instance,
         target_node=target_instance
